@@ -1,33 +1,27 @@
-import React, { useEffect, useState } from 'react';
-import { nanoid } from 'nanoid';
+import { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
 import { ContactForm } from './ContactForm/ContactForm';
 import ContactList from './ContactList/ContactList';
 import Filter from './Filter/Filter';
+import { addContactAction, deleteContactAction } from '../redux/contactsSlice';
+import { filterAction } from '../redux/filterSlice';
 
 export const App = () => {
-  const [contacts, setContacts] = useState(
-    () => JSON.parse(localStorage.getItem('contacts')) ?? []
-  );
-  const [filter, setFilter] = useState('');
+  const { contacts } = useSelector(state => state.contacts);
+  const { filter } = useSelector(state => state.filter);
+  const dispatch = useDispatch();
 
   const handlerFormSubmits = ({ name, number }) => {
-    const newContact = {
-      id: nanoid(5),
-      name,
-      number,
-    };
-
     contacts.find(contact => contact.name.toLowerCase() === name.toLowerCase())
       ? alert(name + ' is already in contacts')
-      : setContacts(prevState => [newContact, ...prevState]);
+      : dispatch(addContactAction({ name, number }));
   };
 
   const changeFilter = event => {
-    setFilter(event.target.value);
+    dispatch(filterAction(event.target.value));
   };
   const handlerDelete = idDelete => {
-    const newContacts = contacts.filter(contact => contact.id !== idDelete);
-    setContacts([...newContacts]);
+    dispatch(deleteContactAction(idDelete));
   };
 
   useEffect(() => {
@@ -35,9 +29,6 @@ export const App = () => {
     JSON.parse(localStorage.getItem('contacts'));
   }, [contacts]);
 
-  const filterContact = contacts.filter(({ name }) =>
-    name.toLowerCase().includes(filter.toLowerCase())
-  );
   return (
     <>
       <h1 className="title">Phone book</h1>
@@ -48,7 +39,7 @@ export const App = () => {
       ) : (
         <></>
       )}
-      <ContactList contacts={filterContact} onDelete={handlerDelete} />
+      <ContactList onDelete={handlerDelete} />
     </>
   );
 };
