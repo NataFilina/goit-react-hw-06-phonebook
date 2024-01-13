@@ -9,10 +9,13 @@ export const ContactForm = () => {
   const { contacts } = useSelector(state => state.contacts);
   const dispatch = useDispatch();
 
-  const handlerFormSubmits = ({ name, number }) => {
+  const handlerFormSubmits = e => {
+    e.preventDefault();
     contacts.find(contact => contact.name.toLowerCase() === name.toLowerCase())
       ? alert(name + ' is already in contacts')
       : dispatch(addContactAction({ name, number }));
+    setName('');
+    setNumber('');
   };
 
   const handleChange = event => {
@@ -30,10 +33,7 @@ export const ContactForm = () => {
 
   return (
     <>
-      <form
-        className={css.form}
-        onSubmit={() => handlerFormSubmits({ name, number })}
-      >
+      <form className={css.form} onSubmit={handlerFormSubmits}>
         <label className={css.label}>
           Name
           <input
